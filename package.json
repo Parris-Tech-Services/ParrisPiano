@@ -1,0 +1,16 @@
+{
+  "name": "parris-piano",
+  "version": "0.1.0",
+  "description": "Web MIDI practice hub and CVP Tutor desktop companion for Yamaha CVP-301.",
+  "private": true,
+  "scripts": {
+    "start": "npx http-server . -p 8080",
+    "serve": "npx http-server . -p 8080",
+    "lint": "eslint midi-keyboard.js",
+    "test": "npm run lint"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "http-server": "^14.1.1"
+  }
+}

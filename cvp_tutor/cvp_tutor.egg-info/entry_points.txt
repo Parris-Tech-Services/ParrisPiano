@@ -1,0 +1,2 @@
+[console_scripts]
+cvp_tutor = cvp_tutor.app:main
