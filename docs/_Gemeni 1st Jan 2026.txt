@@ -1,0 +1,805 @@
+﻿_Gemeni 1st Jan 2026
+
+
+Based on the files you've uploaded, your project has been successfully transformed from a raw conversation log (spec_original.txt) into a structured, professional software design package.
+It looks solid, actionable, and much clearer. The loose requirements have been organized into a concrete plan that a developer (or AI) can actually execute.
+Here is a breakdown of how your original ideas have been translated into the new documents:
+1. Vision: Sharpened Focus
+* Original: You started with a "Shooter" game idea but pivoted mid-spec to a "Personalised AI Piano Teacher"1111.
+* Now (VISION.md): The project is laser-focused on the "Teacher" aspect. The "North Star" is clearly defined as a "reliable, local-first piano tutor" that prioritizes honest feedback over gamification2. The "shooter" mechanics have been refined into a "Play-first UX" with a Synthesia-style view, which is more professional and aligned with your goal for Sylvie3333.
+2. Roadmap: Realistic Phasing
+* Original: The spec listed 4 milestones, including a dedicated "Shooter Game Mode" as Milestone 34.
+* Now (ROADMAP.md): The roadmap has been adjusted to be more practical for a learning tool:
+   * Milestone 1 (MVP): Focuses strictly on core connectivity and the two UI modes (Piano Roll & Keyboard)5.
+   * Milestone 2: Adds the crucial "Wait Mode" and looping, which are the actual teaching tools6.
+   * Milestone 3: Replaces the "Shooter" milestone with "Library, Profiles, Persistence"—essential for tracking progress over time7.
+   * Milestone 4 & 5: Diagnosis and AI Coaching come last, ensuring the foundational app works perfectly before adding complex logic8.
+3. Architecture: Concrete Modules
+* Original: The spec asked for specific Python/PyQt6 implementation9.
+* Now (ARCHITECTURE.md): This file maps your functional requirements into specific code files. For example:
+   * cvp/midi_io.py: Handles the specific CVP-301 connection and "double note" prevention10.
+   * cvp/scoring.py: Implements your requests for specific timing windows (Perfect ±50ms, Good ±110ms)11.
+   * cvp/tutor.py: Will house the state machine for "Follow" vs. "Wait" modes12.
+4. Immediate Next Steps (TO_DO.md)
+The TO_DO.md file is excellent because it provides acceptance criteria for every task. You aren't just saying "build MIDI support"; you are saying "Acceptance: device appears in UI and input events are received." This prevents "half-done" features.
+Summary: Your design docs look very healthy. You have successfully moved from "brainstorming" to "blueprint." The shift away from "Game Mode" to "Library & Profiles" in Milestone 3 is the most significant improvement, as it ensures the app is a useful teacher for Sylvie first, rather than just a toy.
+________________
+
+
+Gemeni
+
+
+This is a significant shift! You have moved from a local Python/PyQt6 desktop app plan to a Web-based (React/Next.js) application hosted on Vercel.
+This is actually a great move for accessibility (you can run it on any laptop connected to the CVP without installing Python), but it means we need to give the AI a prompt that specifically targets Web MIDI API and React instead of Python.
+Based on the current state of your site (which has the "skeleton" of MIDI input and a dashboard), here is the "Mega-Prompt" to take it from a "MIDI Input Tester" to a real "AI Tutor."
+The "Next Step" Prompt for Codex/Cursor/ChatGPT
+Copy and paste this prompt into your AI coding tool. It assumes you are working in the codebase that generated the Vercel site.
+________________
+
+
+PROMPT STARTS HERE
+Plaintext
+I am working on this React/Next.js piano tutor app (currently deployed here: https://parris-piano.vercel.app/).
+
+
+Right now, the app can connect to my Yamaha CVP-301 via Web MIDI and light up the on-screen keyboard when I play. It has the UI skeleton for "Live Score" and "Practice Plan," but no actual game loop yet.
+
+
+I need you to implement the "Interactive Tutor Engine" to make this a real teaching tool.
+
+
+Please implement the following three features using React hooks and the Web MIDI API:
+
+
+1. THE SONG LOADER (Target Data)
+   - Add a file dropzone to load a .mid (MIDI) file.
+   - Parse this MIDI file (recommend using 'midi-parser-js' or similar) into a structured array of "Target Notes" (pitch, start_time, duration).
+   - Display the song title and tempo.
+
+
+2. THE VISUALIZER (Synthesia-style)
+   - Create a Canvas overlay above the existing keyboard component.
+   - Render the "Target Notes" as falling bars that scroll down towards the keyboard.
+   - The view should scroll based on the current playback time.
+
+
+3. THE SCORING ENGINE (The "Tutor")
+   - Create a hook `usePianoScoring(currentSong, liveMidiInput)` that runs a game loop.
+   - Compare my live input (from the CVP-301) against the "Target Notes" at the current timestamp.
+   - Implement the scoring logic from my original specs:
+     * Perfect: Input within ±50ms of target.
+     * Good: Input within ±110ms of target.
+     * Miss: Note skipped or wrong key.
+   - Update the "Live Score" UI component in real-time with hits/misses.
+
+
+4. "WAIT MODE" (Crucial for learning)
+   - Add a toggle for "Wait Mode".
+   - If enabled, the song playback (and the falling notes) must PAUSE if I haven't played the correct note yet.
+   - It should only resume once I hit the correct key.
+
+
+Technical Constraints:
+- Use `performance.now()` for high-precision timing to sync the visualizer and MIDI.
+- Ensure the rendering loop uses `requestAnimationFrame` so it's smooth.
+- Keep the existing "MIDI Input" logic you see in the code; just extend it to compare against the loaded song.
+
+
+________________
+
+
+Why this prompt works
+1. Bridge from Python to Web: It takes the specific logic rules (±50ms windows) from your uploaded ARCHITECTURE.md but asks for them in React/JavaScript.
+2. Focuses on the "Missing Link": Your current site accepts input, but it doesn't know what it's listening for. The Song Loader and Parser are the missing link to make it a game.
+3. Wait Mode: This is the specific feature that separates a "Media Player" from a "Tutor." Asking for it upfront saves you a refactor later.
+________________
+
+
+Claude
+Codex Prompt: Implement Core MIDI Piano Tutor Functionality
+Context
+The Parris Piano app (https://parris-piano.vercel.app/) currently has UI scaffolding but lacks the core MIDI integration and real-time teaching functionality. We need to implement Web MIDI API integration to connect to the Yamaha CVP-301/CVP-391 and build the scoring/feedback engine.
+Critical Requirements
+1. Web MIDI API Integration
+File: src/lib/midi/connection.ts
+// Implement Web MIDI API connection manager
+- Auto-detect and connect to Yamaha CVP-301/CVP-391 MIDI devices
+- Handle device connection/disconnection gracefully
+- Capture: note on/off (0x90/0x80), velocity, sustain pedal (CC64)
+- MIDI OUT for playback and hint notes
+- Display connection status in UI with clear error messages
+
+
+Acceptance Criteria:
+* Pressing piano keys shows instant feedback in browser console (<50ms latency)
+* Device selector dropdown shows available MIDI devices
+* Connection status indicator (green/red) in app header
+* Graceful fallback if Web MIDI not supported (show instructions)
+________________
+
+
+2. MIDI File Parser & Timeline Builder
+File: src/lib/midi/parser.ts
+// Use @tonejs/midi or midifile-ts library
+- Load .mid files (drag-drop or file picker)
+- Build tempo map handling tempo changes
+- Convert ticks → seconds with accurate timing
+- Extract note events: { time_sec, pitch, duration, velocity, track }
+- Group notes into ExpectedMoment objects (CHORD_WINDOW = 40ms)
+- Identify hands: track 1 = right, track 2 = left (user can override)
+
+
+Data Structure:
+interface ExpectedMoment {
+  time_sec: number;
+  bar: number;
+  beat: number;
+  notes: { pitch: number; duration: number }[];
+  hand: 'left' | 'right' | 'both';
+}
+
+
+Acceptance Criteria:
+* Load "Let It Go.mid" (provide sample in /public/midi/)
+* Display song info: title, duration, tempo, time signature
+* Show timeline visualization with bars/beats
+* User can toggle hands separately
+________________
+
+
+3. Real-Time Performance Capture
+File: src/lib/midi/performance.ts
+// Capture and timestamp all incoming MIDI
+- Buffer incoming notes with high-resolution timestamps
+- Track currently held notes (note on without note off)
+- Track pedal state changes
+- Store performance as PerformanceEvent[]
+
+
+interface PerformanceEvent {
+  timestamp_ms: number;
+  type: 'note_on' | 'note_off' | 'pedal';
+  pitch?: number;
+  velocity?: number;
+  pedal_value?: number;
+}
+
+
+Acceptance Criteria:
+* Display live "MIDI Monitor" panel showing incoming events
+* Visualize currently pressed keys on virtual keyboard
+* Record entire practice session to memory
+* Export recorded session as .mid file (download button)
+________________
+
+
+4. Scoring Engine (The Teacher Brain)
+File: src/lib/scoring/matcher.ts
+// Match expected vs played in real-time
+- PERFECT_WINDOW = 50ms (±50ms from expected time)
+- GOOD_WINDOW = 110ms (±110ms from expected time)
+- For each ExpectedMoment, find matching PerformanceEvents
+- Handle chords: all notes in moment must be matched within window
+- Error types: 'perfect' | 'good' | 'late' | 'early' | 'miss' | 'wrong_note'
+
+
+interface ScoreEvent {
+  moment: ExpectedMoment;
+  matched_notes: number[];  // which expected notes were hit
+  extra_notes: number[];     // wrong notes played
+  timing_error_ms: number;   // average timing offset
+  result: 'perfect' | 'good' | 'late' | 'early' | 'miss' | 'wrong';
+}
+
+
+Scoring Modes:
+* Follow Mode (default): song plays, live feedback, forgiving (extra notes OK)
+* Wait Mode: pause at each moment, advance only when correct, strict matching
+Acceptance Criteria:
+* Play a simple melody (e.g., C-D-E-F-G) and get accurate per-note feedback
+* Display color-coded feedback: green (perfect), yellow (good), red (miss/wrong)
+* Per-bar accuracy percentage shown below piano roll
+* Heatmap view: bars colored by accuracy (red=<50%, yellow=50-80%, green=>80%)
+________________
+
+
+5. Visual Feedback - Two Modes
+Mode A: Piano Roll View (Synthesia-style)
+File: src/components/PianoRoll.tsx
+* Horizontal scrolling note highway
+* Expected notes scroll from right to left toward "hit line"
+* Color coding:
+   * Blue = upcoming expected notes
+   * Green = correctly played notes
+   * Red = missed/wrong notes
+   * Yellow = early/late hits
+* Playhead indicator with current bar/beat
+* Left/right hand tracks in different colors
+Mode B: Keyboard Coach View
+File: src/components/KeyboardView.tsx
+* 88-key virtual keyboard (or range of song)
+* Highlight next expected chord in blue (glow/pulse animation)
+* Show pressed keys in real-time (green when correct, red when wrong)
+* Large, kid-friendly design
+* Display note names on keys (optional toggle)
+Acceptance Criteria:
+* Toggle button switches between Piano Roll and Keyboard views
+* Both modes show identical timing/scoring feedback
+* Smooth 60fps rendering even with complex passages
+________________
+
+
+6. Transport Controls & Practice Tools
+File: src/components/TransportBar.tsx
+Playback Controls:
+* ▶ Play / ⏸ Pause / ⏹ Stop
+* Tempo slider: 30% - 120% (with numeric display)
+* Loop region: set A-B points by bar numbers
+* Metronome toggle with count-in
+* Transpose: ±12 semitones
+Practice Tools:
+* "Hands Separate" toggle: Right only / Left only / Both
+* "Hint" button: plays expected chord softly via MIDI OUT (velocity=30, 250ms)
+* "Repeat Bar" button: auto-loop current bar when mistakes detected
+* Section selector: Jump to Intro/Verse/Chorus/Bridge
+Acceptance Criteria:
+* Loop bars 8-12 at 60% tempo and hear accompaniment through piano
+* Hint button plays correct notes through CVP-301
+* Tempo changes feel smooth, no audio glitches
+________________
+
+
+7. Immediate Feedback Panel
+File: src/components/FeedbackPanel.tsx
+Display During Practice:
+* Next expected chord: show note names + keyboard diagram
+* Live accuracy meter (last 8 notes): ✓✓✓✗✓✓✗✓
+* Current bar score: "7/8 notes correct"
+* Combo streak counter: "12 perfect notes in a row! 🔥"
+* Specific error messages:
+   * "Left hand 85ms late"
+   * "Missing top note (A4) in chord"
+   * "Played C# instead of C"
+Post-Practice Summary:
+* Overall accuracy: 87%
+* Perfect notes: 45, Good: 23, Missed: 8
+* Hardest bars: 12, 24, 31 (show bar numbers)
+* Average timing: -65ms (consistently early)
+________________
+
+
+8. Simple Diagnosis Engine (Rule-Based)
+File: src/lib/diagnosis/rules.ts
+Detect Patterns:
+// Analyze ScoreEvent[] to find:
+- Consistent timing bias (>50ms average early/late)
+- Weak fingers (specific notes often missed)
+- Chord incompleteness (always missing top/bottom note)
+- Rush after rests
+- Struggle with jumps >5 semitones
+- Pedal issues (stuck on/off, bad timing)
+
+
+Output 2-3 Specific Insights:
+* "You're consistently 70ms late with your left hand"
+* "You miss the top note in 80% of right-hand chords"
+* "You rush by 40ms after every rest"
+Generate Drill Suggestions:
+* "Practice bar 12 hands separately at 50% tempo"
+* "Try these chord transitions: [show specific drills]"
+* "Clap the rhythm of bars 24-28 before playing"
+Acceptance Criteria:
+* After playing through a song, see 2-3 actionable insights
+* Each insight links to specific bar ranges
+* "Practice This" button auto-sets up loop + reduced tempo
+________________
+
+
+9. Basic Practice Planner
+File: src/lib/planner/session.ts
+Auto-Generate 10-15 Min Session:
+1. Warmup: Easiest mastered section (2 mins)
+2. Focused Work: Worst 2 bar ranges at 60% tempo (5 mins)
+3. Integration: Chorus at 80% tempo (3 mins)
+4. Victory Lap: Easy section at 100% tempo (2 mins)
+
+
+Profile Tracking (LocalStorage):
+interface UserProfile {
+  name: string;
+  songs: {
+    [songId: string]: {
+      sections: {
+        [barRange: string]: {
+          best_tempo: number;
+          best_accuracy: number;
+          last_practiced: Date;
+          attempts: number;
+        }
+      }
+    }
+  }
+  skill_ratings: {
+    timing: number;      // 0-100
+    chord_fluency: number;
+    sight_reading: number;
+  }
+}
+
+
+Acceptance Criteria:
+* Click "Generate Practice Plan" → get structured session
+* Profile persists across sessions (localStorage)
+* See progress graph: tempo/accuracy over time
+________________
+
+
+10. Critical UX Polish
+Loading States:
+* MIDI device connecting: show spinner
+* MIDI file parsing: progress indicator
+* Clear error messages for common issues
+Performance:
+* 60fps rendering even with dense passages
+* <50ms input latency (critical for musician feel)
+* Efficient scoring algorithm (process notes in O(n))
+Accessibility:
+* Keyboard shortcuts: Space=play/pause, L=loop, H=hint
+* Screen reader support for feedback messages
+* High contrast mode toggle
+________________
+
+
+Implementation Order (Build in This Sequence)
+Week 1: MIDI Foundation
+1. Web MIDI connection + device selector
+2. MIDI monitor panel showing raw events
+3. Virtual keyboard showing pressed keys
+Week 2: Song Playback
+4. MIDI file parser + timeline builder
+5. Playback engine with tempo/loop controls
+6. Piano roll visualization (basic)
+Week 3: Scoring Core
+7. Performance capture + recording
+8. Scoring engine (Follow mode first)
+9. Immediate feedback panel
+Week 4: Teaching Features
+10. Wait mode implementation
+11. Hands separate + hint button
+12. Diagnosis + drill suggestions
+Week 5: Polish
+13. Practice planner + profile system
+14. Keyboard Coach view (alternative to piano roll)
+15. Export features + session summary
+________________
+
+
+Testing Requirements
+Unit Tests:
+* MIDI parser handles tempo changes correctly
+* Chord grouping (40ms window) works accurately
+* Scoring engine matches expected vs played correctly
+Integration Tests:
+* Load "Let It Go.mid" → practice first 8 bars → get accurate feedback
+* Simulate MIDI input stream → verify scoring results
+* Loop bars 5-8 at 70% tempo → plays correctly
+Manual QA Checklist:
+* [ ] Connect CVP-301 → green indicator shows
+* [ ] Press keys → instant visual feedback (<50ms)
+* [ ] Load MIDI → timeline shows correctly
+* [ ] Play through song → get per-bar scores
+* [ ] Use hint button → piano plays expected notes
+* [ ] Practice session → receive 2-3 insights
+* [ ] Works in Chrome, Edge (Web MIDI support required)
+________________
+
+
+Libraries to Use
+{
+  "dependencies": {
+    "@tonejs/midi": "^2.0.28",        // MIDI file parsing
+    "react": "^18.3.1",
+    "zustand": "^4.5.0",              // State management
+    "framer-motion": "^11.0.0",       // Animations
+    "recharts": "^2.12.0"             // Progress graphs
+  }
+}
+
+
+________________
+
+
+Key Files to Create/Modify
+src/
+├── lib/
+│   ├── midi/
+│   │   ├── connection.ts          # Web MIDI API wrapper
+│   │   ├── parser.ts              # MIDI file → timeline
+│   │   ├── performance.ts         # Capture player input
+│   │   └── playback.ts            # Scheduled MIDI OUT
+│   ├── scoring/
+│   │   ├── matcher.ts             # Expected vs played
+│   │   └── types.ts               # ScoreEvent, ExpectedMoment
+│   ├── diagnosis/
+│   │   ├── rules.ts               # Pattern detection
+│   │   └── drills.ts              # Generate practice exercises
+│   └── planner/
+│       ├── session.ts             # Auto-generate plans
+│       └── profile.ts             # User progress tracking
+├── components/
+│   ├── PianoRoll.tsx              # Synthesia view
+│   ├── KeyboardView.tsx           # Highlighted keyboard
+│   ├── TransportBar.tsx           # Playback controls
+│   ├── FeedbackPanel.tsx          # Live scoring display
+│   └── MidiMonitor.tsx            # Debug panel
+└── stores/
+    ├── midiStore.ts               # MIDI connection state
+    ├── songStore.ts               # Loaded song + timeline
+    └── sessionStore.ts            # Practice session state
+
+
+________________
+
+
+Success Criteria (Demo Script)
+5-Minute Demo:
+1. Open app → connect to Yamaha CVP-301 (green indicator)
+2. Load "Let It Go.mid" → see timeline with bars/beats
+3. Press keys → see instant feedback on virtual keyboard
+4. Click Play → see notes scrolling in piano roll
+5. Play along → get per-bar accuracy scores
+6. Make intentional mistakes → see red highlights + specific errors
+7. Click "Repeat Bar" on hard section → auto-loops at 60% tempo
+8. Use "Hint" button → piano plays expected chord
+9. Finish practice → see diagnosis: "Left hand 75ms late, missing chord tops"
+10. Click "Generate Plan" → get next session structure
+The app should feel like a patient teacher who:
+* ✅ Knows exactly what you played
+* ✅ Tells you specifically what went wrong
+* ✅ Suggests targeted fixes
+* ✅ Adapts difficulty to your progress
+* ✅ Makes practice structured but not overwhelming
+________________
+
+
+Additional Notes
+Web MIDI Limitations:
+* Only works in Chrome/Edge (not Firefox/Safari yet)
+* Requires HTTPS (works on localhost or deployed)
+* User must grant permission to access MIDI devices
+If Web MIDI Doesn't Work: Consider Electron wrapper for true desktop app with better MIDI support.
+Kid Mode Features (Future):
+* Larger buttons and text
+* Simplified scoring (just ✓ or ✗)
+* Reward animations and encouraging messages
+* Parent dashboard showing progress
+________________
+
+
+Final Prompt Summary
+Your Goal: Transform the current UI mockup into a fully functional MIDI piano tutor that connects to my Yamaha CVP-301, listens to what I play in real-time, gives instant visual and diagnostic feedback, and helps me improve through targeted practice plans.
+Start with: MIDI connection + simple note matching + basic piano roll view. Then add Wait mode, diagnosis, and practice planning.
+Quality Bar: Should feel as responsive and accurate as a real piano teacher sitting next to me, noticing every mistake and explaining exactly what to fix.
+Let's build the core teaching engine first, then polish the UX. Begin with Week 1 tasks and we'll iterate from there.
+________________
+
+
+Looking at your deployed app and design docs, you've made great progress on the UI foundation! However, I can see the app is currently web-based (on Vercel), but your design docs specify a Windows desktop app with direct MIDI connectivity - this is a critical architectural mismatch that needs addressing.
+Let me write you a comprehensive prompt to get the core MIDI tutor functionality working:
+________________
+
+
+🎹 Key Observations About Your Current App
+Good progress on:
+* Clean UI foundation
+* Basic layout structure
+* Modern tech stack (React/Next.js)
+Critical gaps to address:
+1. No MIDI connectivity - this is the heart of the app
+2. No scoring engine - can't give feedback without this
+3. No real-time performance capture - need to "hear" what you play
+4. Missing teaching modes (Wait/Follow) - these make it a tutor, not just a viewer
+🚀 Immediate Next Steps
+The prompt above focuses on Web MIDI API since you're deployed on Vercel (web-based). This is actually simpler than the desktop approach in your docs, but has limitations:
+* Only works in Chrome/Edge
+* Requires HTTPS or localhost
+* User must grant MIDI permissions
+If you want desktop instead: You'll need to rewrite using Electron + node-midi for more reliable MIDI access.
+Give this prompt to your AI coding tool and start with the Week 1 tasks (MIDI connection + monitor). Once you can see piano keypresses in the browser, everything else builds on top of that foundation.
+Would you like me to adjust anything in the prompt based on specific features you want to prioritize?
+________________
+
+
+Grok
+
+
+### Assessment of Current App vs. Original Design Docs
+
+
+Based on the original design documents (VISION.md, ROADMAP.md, ARCHITECTURE.md, spec_original.txt, etc.), your app was envisioned as a comprehensive, local-first desktop application (built with Python/PyQt6) focused on real-time MIDI integration with the Yamaha CVP-301. Key goals included low-latency MIDI I/O, detailed scoring and diagnosis (e.g., rule-based insights like "left hand late by 70ms"), personalized practice planning with spaced repetition, multiple tutor modes (Follow and Wait), UI views (piano-roll and on-screen keyboard), and optional AI coaching via structured session summaries.
+
+
+Looking at the published version at https://parris-piano.vercel.app/ (which I've reviewed), it's evolved into a web-based "hub" app using Web MIDI for browser-based interaction. This is a solid pivot for accessibility—it's deployable online via Vercel, supports live MIDI input from the CVP-301 (with on-screen keyboard lighting and basic real-time scoring like PERFECT/GOOD based on timing windows), includes a metronome, recording with loops, and even auto-generates simple practice plans from scoring data. It integrates external tools (e.g., Midiano for training, Synthesia for play-along, MuseScore for notation) via links, which aligns with the "library and progress tracking" in Milestone 3 of the roadmap. Reliability notes (e.g., needing localhost for full Web MIDI) show thoughtful handling of browser limitations.
+
+
+Strengths compared to docs:
+- MIDI connectivity is implemented (Milestone 1 core achieved via Web MIDI).
+- Basic real-time feedback and scoring exist, with visual elements (on-screen keyboard highlights).
+- Practice planning is partially there (auto-drills from data), touching on Milestone 4.
+- It's more user-friendly for quick starts, with local settings persistence and kid-friendly potential.
+
+
+Gaps and opportunities:
+- It's not yet the full "personalized AI coach"—lacks advanced diagnosis (e.g., no rule-based or AI-driven insights like chord dropping or rhythm rushing), detailed progress tracking (e.g., user profiles, spaced repetition), or tutor modes (e.g., Wait mode, looping with tempo scaling).
+- UI is hub-focused (launching external tools) rather than integrated (no built-in piano-roll view, section markers, or full song library management).
+- MIDI output (e.g., hint playback, ghost notes) isn't mentioned, so feedback is input-only.
+- No recording export to MIDI files or session summaries for LLM coaching (Milestone 5).
+- As a web app, it might have latency/browser constraints vs. the desktop's non-blocking threads.
+- Overall progress: You've hit MVP elements from Milestone 1-2, but Milestones 3-5 (library, diagnosis, AI) are partial or external-dependent. It's looking promising as a lightweight entry point, but to reach the "north star" of making users "really good piano players," it needs deeper integration, AI enhancements, and more robust real-time tutoring.
+
+
+This sets a great foundation—now it's about building inward (enhance core features) rather than outward (more links).
+
+
+### Next Prompt for Codex (or AI Autocoder)
+
+
+Here's a tailored, self-contained prompt you can copy-paste to an AI coder like Codex/GPT-4/Claude to generate improvements. It references the current app's URL, incorporates your original docs for continuity, and focuses on elevating it to a "much better AI music piano tutor" with enhanced MIDI for real-time feedback. I've structured it with milestones, file suggestions, and acceptance tests to make it "autocoder-able," while emphasizing web compatibility (since your current version is web-based).
+
+
+---
+
+
+**Project: Enhance Parris Piano App to Full AI Piano Tutor**
+
+
+You are an expert AI autocoder building on the existing web app at https://parris-piano.vercel.app/ (source likely in React/Next.js on Vercel, using Web MIDI API). The goal is to transform this hub into a comprehensive, personalized AI piano tutor for the Yamaha CVP-301, providing real-time feedback during play to help users become really good piano players. Incorporate MIDI input/output for low-latency interaction, advanced scoring/diagnosis, and AI-driven coaching.
+
+
+Reference these original design docs for core concepts (do not deviate from principles like local-first, honest feedback, and progressive complexity):
+
+
+- **VISION.md**: North star is a personalized AI teacher with play-score-diagnose-coach loops, local MIDI, data-driven insights.
+- **ROADMAP.md**: Build iteratively via milestones; start with MIDI core, add wait/looping, library/profiles, diagnosis/planner, AI coach.
+- **ARCHITECTURE.md**: Separate concerns (MIDI I/O, parsing, timeline, playback, scoring, tutor state, diagnosis, UI). Use threads/async for non-blocking.
+- **spec_original.txt**: Detailed specs for MIDI connectivity, timing engine, scoring (pitch/rhythm/chords), diagnosis (e.g., "left hand late"), personalization (profiles, spaced repetition), tutor modes (Follow/Wait), UI views (piano-roll/on-screen keyboard), AI coaching via session JSON.
+
+
+Current app features (build on these):
+- Web MIDI input from CVP-301.
+- On-screen keyboard with note lighting.
+- Basic real-time scoring (PERFECT/GOOD based on ±50/110ms windows).
+- Metronome, recording with loops, download.
+- Practice plan generation from scoring.
+- Local settings storage.
+- Links to external tools (integrate where possible, e.g., embed Midiano-like functionality).
+
+
+Improvements needed:
+- Add MIDI output (e.g., hints, ghost notes, playback).
+- Implement full tutor modes (Follow for free play with feedback; Wait for pause-until-correct).
+- Enhance scoring: Add chord handling, error types (wrong/missed/incomplete), heatmaps per bar.
+- Add diagnosis: Rule-based first (e.g., detect rushing, chord drops), then AI-polished via session JSON fed to an LLM (use local/offline if possible, or integrate with Grok/OpenAI API).
+- Personalization: User profiles with skill ratings, weakness tags, spaced repetition for practice plans.
+- UI enhancements: Add piano-roll view (scrolling notes), section markers, song library (upload/parse MIDI files).
+- Make it "really good player" focused: Adaptive difficulty (auto-tempo adjust), drills (e.g., isolate bars, simplify chords for kids), progress graphs.
+- Reliability: Latency calibration, error handling for MIDI, work in browser (use Web MIDI + Web Workers for async).
+
+
+Build strategy: 3 milestones to keep it iterative. Output full code updates (not stubs) as a GitHub-ready repo diff or new files. Use JavaScript/TypeScript, Web MIDI API, Tone.js or Midi.js for MIDI handling/parsing/playback, Chart.js for graphs, localStorage/IndexedDB for persistence. Ensure cross-browser (Chrome priority for MIDI). No external dependencies beyond what's needed; keep bundle small.
+
+
+**Milestone 1: Enhanced MIDI Core + Tutor Modes**
+- Add MIDI output: Send notes/hints to CVP-301 (e.g., play soft ghost notes for next chord).
+- Parse/upload MIDI files: Build timeline (ticks to seconds, tempo map), extract notes/chords/sections.
+- Implement Follow mode: Scroll/play along with real-time feedback (highlight hits/misses).
+- Implement Wait mode: Pause until correct note/chord played; add hint button (play expected softly).
+- UI: Add piano-roll view (toggle with on-screen keyboard); show expected vs. played.
+- Acceptance tests: Upload sample MIDI (provide a simple one like "Twinkle Twinkle"), play in Wait mode—app waits, hints work, feedback accurate.
+
+
+Files to add/update:
+- `src/components/MidiParser.js`: Load/parse MIDI, build timeline/ExpectedMoments.
+- `src/components/TutorEngine.js`: State machine for modes, matching/scoring.
+- `src/components/PianoRollView.js`: Scrolling notes rendering.
+- `src/pages/index.js`: Integrate new views/modes.
+
+
+**Milestone 2: Advanced Scoring + Diagnosis**
+- Scoring: Group chords (40ms window), error types, per-bar heatmaps, sustain pedal support.
+- Diagnosis: Rule-based (e.g., detect consistent lateness >50ms, missed notes in patterns); output top 3 issues.
+- Recording: Export as MIDI with annotations (mistakes highlighted).
+- UI: Show heatmap, diagnosis summary post-session.
+- Acceptance tests: Play a chord sequence—scores correctly; diagnoses "rushing after rests" if simulated.
+
+
+Files:
+- `src/components/ScoringEngine.js`: Matching logic, error classification.
+- `src/components/Diagnosis.js`: Rules and insights generation.
+- `src/components/Heatmap.js`: Visual bar summaries.
+
+
+**Milestone 3: AI Coach + Personalization**
+- Profiles: Save user data (skills, history) in localStorage.
+- Practice planner: Generate 10-20min plans with warmup/drills/full runs, using spaced repetition.
+- AI layer: Create session JSON (mistakes, stats); prompt LLM (integrate simple API call) for textual coaching (e.g., "Try clapping rhythms first").
+- Adaptive: Auto-adjust tempo based on accuracy (>90% → speed up).
+- UI: Progress graphs, plan viewer/download.
+- Acceptance tests: Complete session—generates personalized plan; AI outputs specific advice like "Focus on left-hand independence."
+
+
+Files:
+- `src/components/UserProfile.js`: Data models, persistence.
+- `src/components/PracticePlanner.js`: Algorithm for plans, repetition.
+- `src/components/AICoach.js`: JSON builder + LLM integration (fallback to rules if offline).
+
+
+Final output: Full updated repo code (zip or GitHub link sim), with README updates including setup (USB driver, browser flags), sample MIDI, and how to run locally. Ensure real-time feedback feels responsive (<50ms lag) to build piano skills effectively.
+
+
+Two quick prefs: Use kid-friendly simplifications (e.g., chords to melody notes toggle). Prioritize offline where possible.
+
+
+Generate the code now.
+
+
+--- 
+
+
+This prompt is dense but precise—adjust if needed (e.g., add sample MIDI data). It should yield actionable code to level up your app!
+________________
+
+
+Deepseek
+
+
+Looking at your design documents and the current app at https://parris-piano.vercel.app/, I can see you have a solid architectural foundation but need to evolve from the static web-based visualization toward a real-time, interactive AI piano tutor with MIDI functionality. Here's the next prompt you should give to Codex (or your development assistant) to transform your app:
+
+
+---
+
+
+## **PROMPT: Build Real-Time MIDI AI Piano Tutor with Advanced Feedback**
+
+
+**Objective:** Transform the Parris Piano App from a static MIDI visualizer into a real-time, interactive AI piano tutor that connects to your digital piano via MIDI and provides intelligent feedback as you play.
+
+
+**Core Requirements:**
+
+
+### 1. **MIDI Integration & Real-Time Processing**
+- Implement `Web MIDI API` support for browser-based MIDI connectivity
+- Create a `MIDI Bridge Server` (Python/Node.js) for Windows desktop with better latency than browser MIDI
+- Support both USB-MIDI and traditional MIDI interfaces for Yamaha CVP-301
+- Implement latency calibration system with visual tap-to-beat calibration routine
+
+
+### 2. **Real-Time Analysis Engine**
+- Process incoming MIDI notes with timestamps (±1ms accuracy)
+- Implement sliding window analysis (last 10 seconds) for immediate feedback
+- Create `RealTimeScorer` class that evaluates:
+  - Timing accuracy relative to metronome/backing track
+  - Note accuracy against expected notes
+  - Velocity/dynamics consistency
+  - Pedal timing and usage
+  - Hand synchronization (LH vs RH timing differences)
+
+
+### 3. **Intelligent Feedback System**
+- **Immediate Feedback Layer:**
+  - Visual keyboard highlighting (correct/wrong/late notes)
+  - On-screen messages: "Rushing!", "Late LH", "Excellent timing!"
+  - Haptic feedback options (if supported)
+  
+- **Micro-Correction Suggestions:**
+  - "Your thumb is hitting C# instead of C"
+  - "Release pedal before chord change"
+  - "Try lighter touch on melody notes"
+
+
+### 4. **AI-Powered Practice Intelligence**
+- Implement `DifficultyAdaptor` that:
+  - Detects repeated mistakes in specific passages
+  - Automatically creates simplified versions (remove chords, slow tempo)
+  - Gradually increases complexity as mastery improves
+  
+- Create `PracticeRecommender` that:
+  - Analyzes error patterns across sessions
+  - Suggests specific exercises (scales, arpeggios, rhythm drills)
+  - Uses spaced repetition for weak spots
+
+
+### 5. **Performance Visualization Dashboard**
+- Real-time accuracy graph (rolling 30-second window)
+- Heat map of keyboard showing most-missed notes
+- Progress tracking per song/section
+- "Today's improvements" summary
+
+
+### 6. **Multi-Mode Learning System**
+- **Guided Mode:** Note-by-note guidance with wait-for-correct
+- **Performance Mode:** Play-along with real-time scoring
+- **Challenge Mode:** Gameified exercises with scoring/levels
+- **Free Play Mode:** AI analyzes improvisation and suggests improvements
+
+
+### 7. **Technical Implementation Priorities**
+
+
+**Phase 1: Foundation (Week 1-2)**
+```
+1. Set up MIDI I/O with Web MIDI API + local bridge
+2. Create real-time note capture system with precise timing
+3. Implement basic scoring (correct/incorrect notes)
+4. Add visual keyboard with real-time highlighting
+```
+
+
+**Phase 2: Intelligence (Week 3-4)**
+```
+1. Build timing analysis system with rhythm detection
+2. Implement error pattern recognition
+3. Create adaptive difficulty system
+4. Add basic practice recommendations
+```
+
+
+**Phase 3: Polish (Week 5-6)**
+```
+1. Refine feedback algorithms with musical intelligence
+2. Add comprehensive progress tracking
+3. Implement gamification elements
+4. Optimize for low-latency performance
+```
+
+
+### 8. **Key Features to Add Now:**
+- **Metronome integration** with visual/audio cues
+- **Section looping** with automatic repetition counting
+- **Hand-separate analysis** (identifies which hand makes errors)
+- **Chord recognition** and voicing feedback
+- **Tempo gradient** (auto-speed-up on mastery)
+- **Mistake replay** (hear what you played vs expected)
+
+
+### 9. **Data Structure for AI Training:**
+```json
+{
+  "session": {
+    "timestamp": "2024-01-15T10:30:00Z",
+    "piece": "Let It Go",
+    "section": "Chorus",
+    "events": [
+      {
+        "expected": {"notes": [60, 64, 67], "time": 12.345},
+        "played": {"notes": [60, 64, 66], "time": 12.401},
+        "errors": ["wrong_note", "late"],
+        "feedback": "Played G instead of E in chord"
+      }
+    ],
+    "patterns": {
+      "consistent_errors": ["flat_thumb_position", "rushed_16th_notes"],
+      "improvements": ["better_pedal_timing", "smoother_arpeggios"]
+    }
+  }
+}
+```
+
+
+### 10. **Acceptance Criteria for Next Release:**
+- [ ] Connect to digital piano via MIDI within 30 seconds
+- [ ] Display real-time note accuracy (within 200ms latency)
+- [ ] Provide specific feedback on at least 3 error types
+- [ ] Automatically adjust difficulty based on performance
+- [ ] Generate personalized practice plan after each session
+- [ ] Export progress data for review
+
+
+**Deliverable:** A Windows/Mac application (or progressive web app with local server) that transforms your piano into an intelligent tutor, providing the specific, actionable feedback of a human teacher with the patience and data-tracking of AI.
+
+
+---
+
+
+**Next Steps:** Start with implementing the Web MIDI API integration in your existing React app, then build the real-time analysis engine. The key is moving from visualization to interaction - every note you play should trigger intelligent analysis and helpful feedback.

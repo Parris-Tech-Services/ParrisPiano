@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parris Piano Hub</title>
+  <style>
+    :root {
+      --bg: #0e1117;
+      --card: #171b23;
+      --accent: #ff7a5c;
+      --accent-2: #7dd3fc;
+      --text: #e7edf5;
+      --muted: #9fb0c7;
+      --shadow: 0 20px 60px rgba(0,0,0,0.45);
+      --radius: 18px;
+      --font: "Soehne", "Helvetica Neue", Arial, sans-serif;
+      --heading: "DM Sans", "Soehne", "Helvetica Neue", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 15% 20%, rgba(255,122,92,0.15), transparent 25%),
+                  radial-gradient(circle at 80% 10%, rgba(125,211,252,0.15), transparent 30%),
+                  radial-gradient(circle at 60% 80%, rgba(255,122,92,0.08), transparent 35%),
+                  var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.6;
+      padding: 32px clamp(16px, 4vw, 48px) 48px;
+    }
+    header {
+      max-width: 980px;
+      margin: 0 auto 28px;
+      text-align: center;
+    }
+    h1 {
+      font-family: var(--heading);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin: 0 0 10px;
+      font-size: clamp(32px, 5vw, 52px);
+    }
+    .tagline {
+      color: var(--muted);
+      margin: 0 auto;
+      max-width: 720px;
+      font-size: 16px;
+    }
+    .grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,122,92,0.3);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.5);
+    }
+    #midi-card {
+      grid-column: 1 / -1;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,122,92,0.1);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      letter-spacing: 0.01em;
+      font-weight: 700;
+    }
+    .card h2 {
+      margin: 12px 0 6px;
+      font-family: var(--heading);
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -0.01em;
+    }
+    .card p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 13px;
+      background: linear-gradient(120deg, rgba(255,122,92,0.18), rgba(125,211,252,0.12));
+      transition: all 130ms ease;
+    }
+    .btn:hover {
+      border-color: rgba(255,122,92,0.5);
+      color: #fff;
+    }
+    footer {
+      max-width: 980px;
+      margin: 30px auto 0;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+    }
+    .note {
+      color: var(--accent-2);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="pill">Practice Hub</div>
+    <h1>Parris Piano App</h1>
+    <p class="tagline">
+      One page to launch practice, notation, DAW work, and visualizers with your Yamaha CVP-301.
+    </p>
+  </header>
+
+  <main class="grid">
+    <article class="card" id="midi-card">
+      <div class="pill">MIDI</div>
+      <h2>CVP-301 Live Input</h2>
+      <p>Connect your Yamaha CVP-301 via USB and select the input below. Play notes to see the on-screen keyboard light up.</p>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+        <label style="color:var(--muted);font-weight:700;">MIDI Input:</label>
+        <select id="midi-inputs" style="min-width:260px;padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--text);border:1px solid rgba(255,255,255,0.04);">
+          <option value="">(No device)</option>
+        </select>
+        <div id="midi-status" style="margin-left:auto;color:var(--muted);font-weight:700">Status: <span style="color:var(--accent-2)" id="midi-state">disconnected</span></div>
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+        <button id="pan-left" class="btn">◀</button>
+        <button id="pan-right" class="btn">▶</button>
+
+        <label style="color:var(--muted);font-weight:700;margin-left:8px;">Range:</label>
+        <select id="key-range" style="padding:6px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--text);border:1px solid rgba(255,255,255,0.04);">
+          <option value="2">2 octaves</option>
+          <option value="3">3 octaves</option>
+          <option value="4">4 octaves</option>
+          <option value="5">5 octaves</option>
+          <option value="full" selected>Full</option>
+        </select>
+
+        <label style="color:var(--muted);font-weight:700;margin-left:12px;">BPM:</label>
+        <input id="tempo" type="range" min="40" max="200" value="100" style="width:140px">
+        <div id="bpm-value" style="min-width:42px;text-align:center;color:var(--muted);font-weight:700">100</div>
+        <button id="metronome-toggle" class="btn">Start Metronome</button>
+        <div id="beat-indicator" style="margin-left:6px"></div>
+
+        <button id="set-loop-a" class="btn">Set A</button>
+        <button id="set-loop-b" class="btn">Set B</button>
+        <button id="toggle-loop" class="btn">Loop: Off</button>
+        <div id="loop-info" style="min-width:140px;color:var(--muted);font-size:13px;text-align:left;padding-left:8px">A: —  B: —</div>
+        <button id="record-toggle" class="btn">Start Recording</button>
+        <button id="download-recording" class="btn">Download Recording</button>
+        <div id="record-timer" style="min-width:70px;color:var(--muted);font-weight:700">00:00</div>
+
+        <button id="fit-width" class="btn" style="margin-left:auto">Fit Width</button>
+        <button id="dock-toggle" class="btn">Expand Keyboard</button>
+      </div>
+
+      <div id="keyboard-container"></div>
+      <p style="font-size:13px;color:var(--muted);margin-top:10px;">Note: For full Web MIDI support open this page from <strong>http://localhost</strong> or in a browser that allows MIDI access from file URLs (Chrome usually requires a secure context).</p>
+      <div id="score-panel" style="margin-top:12px;padding:10px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.03);">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <strong style="color:var(--text)">Live Score</strong>
+          <div style="color:var(--muted);font-size:13px">PERFECT ±50ms · GOOD ±110ms</div>
+          <div style="margin-left:auto;color:var(--muted);font-size:13px">Bars shown: <span id="score-bars-count">8</span></div>
+        </div>
+        <div id="score-bars" style="display:flex;gap:6px;align-items:flex-end;height:56px"></div>
+        <div id="score-summary" style="margin-top:8px;color:var(--muted);font-size:13px">No notes scored yet.</div>
+      </div>
+      <div id="practice-panel" style="margin-top:12px;padding:10px;background:rgba(255,255,255,0.01);border-radius:10px;border:1px solid rgba(255,255,255,0.03);">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <strong style="color:var(--text)">Practice Plan</strong>
+          <div style="color:var(--muted);font-size:13px">Auto-generate short drills from recent scoring.</div>
+          <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+            <button id="gen-plan" class="btn">Generate Plan</button>
+            <button id="download-plan" class="btn">Download Plan</button>
+          </div>
+        </div>
+        <div id="plan-output" style="color:var(--muted);font-size:13px;white-space:pre-wrap">No plan generated yet.</div>
+      </div>
+      <div id="practice-history-panel" style="margin-top:12px;padding:10px;background:rgba(255,255,255,0.01);border-radius:10px;border:1px solid rgba(255,255,255,0.03);">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <strong style="color:var(--text)">Practice History</strong>
+          <div style="color:var(--muted);font-size:13px">Your last ten recorded sessions stay on this device.</div>
+          <button id="clear-practice-history" class="btn" style="margin-left:auto">Clear History</button>
+        </div>
+        <div id="practice-history" style="display:grid;gap:8px;color:var(--muted);font-size:13px">No recorded sessions yet.</div>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Settings</div>
+      <h2>App Settings</h2>
+      <p>Toggle application-level options. Settings are saved locally.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+        <label style="display:flex;align-items:center;gap:10px;color:var(--muted);">
+          <input type="checkbox" id="hide-keyboard-toggle">
+          <span>Hide On-screen Keyboard</span>
+        </label>
+        <p style="margin:0;color:var(--muted);font-size:13px">Use this to hide the keyboard when you want a minimal UI.</p>
+      </div>
+    </article>
+    <article class="card">
+      <div class="pill">Guided Practice</div>
+      <h2>Piano Marvel</h2>
+      <p>Structured lessons, sight-reading tests, and progress tracking. Works great with MIDI keyboards.</p>
+      <div class="links">
+        <a class="btn" href="https://pianomarvel.com/en/nextgen/dashboard" target="_blank" rel="noopener">Open Dashboard</a>
+        <a class="btn" href="https://pianomarvel.com" target="_blank" rel="noopener">Learn More</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Browser Practice</div>
+      <h2>Midiano</h2>
+      <p>Web-based piano trainer with MIDI in/out. Great for quick practice without installs on the CVP-301.</p>
+      <div class="links">
+        <a class="btn" href="https://app.midiano.com/" target="_blank" rel="noopener">Open Midiano</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Learning + Games</div>
+      <h2>Synthesia</h2>
+      <p>Play-along falling notes with MIDI in/out. Great for learning songs quickly and drilling hands.</p>
+      <div class="links">
+        <a class="btn" href="https://www.synthesiagame.com" target="_blank" rel="noopener">Website</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Performance Visuals</div>
+      <h2>SeeMusic</h2>
+      <p>Record and render cinematic key-light videos from your MIDI performance.</p>
+      <div class="links">
+        <a class="btn" href="https://www.seemusicapp.com/download" target="_blank" rel="noopener">Download</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Open Source</div>
+      <h2>MIDIVisualizer</h2>
+      <p>DIY visualizer you can tweak/build yourself. Good for lightweight rendering or custom looks.</p>
+      <div class="links">
+        <a class="btn" href="https://github.com/skyzh/midi-visualizer" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Notation</div>
+      <h2>MuseScore Studio</h2>
+      <p>Import MIDI from the CVP, clean up notation, and print/share polished scores.</p>
+      <div class="links">
+        <a class="btn" href="https://musescore.org/en/download" target="_blank" rel="noopener">Download</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">DAW Recording</div>
+      <h2>Cakewalk</h2>
+      <p>Full DAW for sequencing, mixing, and capturing audio/MIDI from the CVP-301.</p>
+      <div class="links">
+        <a class="btn" href="https://www.bandlab.com/products/cakewalk" target="_blank" rel="noopener">Download</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Local DAW (installed)</div>
+      <h2>Cakewalk Sonar</h2>
+      <p>Browsers block running EXE directly. Use the folder link, then launch Sonar.exe (or pin a desktop shortcut).</p>
+      <div class="links">
+        <a class="btn" href="file:///C:/Program%20Files/Cakewalk/Sonar/">Open Install Folder</a>
+        <a class="btn" href="https://www.bandlab.com/products/cakewalk" target="_blank" rel="noopener">Reinstall/Update</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">DAW Alternative</div>
+      <h2>Tracktion Waveform</h2>
+      <p>Modern workflow DAW; great for quick MIDI composition and audio capture.</p>
+      <div class="links">
+        <a class="btn" href="https://www.tracktion.com/products/waveform-free" target="_blank" rel="noopener">Download</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Quick Play</div>
+      <h2>FreePiano</h2>
+      <p>Simple MIDI router/virtual piano to test your CVP connection and play soft synths.</p>
+      <div class="links">
+        <a class="btn" href="https://freepiano.tiwb.com/en/" target="_blank" rel="noopener">Website</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Sheet Music</div>
+      <h2>My Google Drive</h2>
+      <p>Collection of sheet music and practice materials. Opens the shared Drive folder in your browser.</p>
+      <div class="links">
+        <a class="btn" href="https://drive.google.com/drive/folders/0B6bODXWhwMjKdDU3U1p3bjFmLTA?resourcekey=0-aQ1yhQwnHbthIVjs5_ry_g&usp=sharing" target="_blank" rel="noopener">Open Folder</a>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    Use your Yamaha USB-MIDI driver for tight latency. <span class="note">Tip:</span> start with Piano Marvel for drills, then jump to DAW/notation when arranging.
+  </footer>
+  <script src="midi-keyboard.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.27/build/Midi.js"></script>
+  <script src="https://unpkg.com/vexflow/releases/vexflow-min.js"></script>
+</body>
+</html>

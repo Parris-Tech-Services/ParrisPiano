@@ -1,0 +1,22 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Try the new cross-platform PowerShell https://aka.ms/pscore6
+
+PS C:\Users\joshu> cd C:\Users\joshu\Desktop\ParrisPianoApp
+>> .\cvp_tutor\.venv\Scripts\Activate.ps1
+>> python -m cvp_tutor.app
+>>
+2026-01-03 11:48:06.079 | INFO     | cvp_tutor.ui_main:run:748 - Starting CVP Tutor UI
+
+
+
+
+
+
+
+
+
+
+
+

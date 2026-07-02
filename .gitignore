@@ -1,0 +1,41 @@
+.venv/
+logs/
+__pycache__/
+cvp_tutor/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdf
+*.musicxml
+node_modules/
+dist/
+build/
+sheet.js
+start_server.bat
+
+# Ignore large vendor and binary directories
+CVP301/
+CVP301/**/cvp301_v180/**
+CVP301/freepiano_2.2.2.1_win64/**
+CVP301/ableton_live_trial_12.3.2_64/**
+CVP301/um3141x64/**
+CVP301/**/LLMidi.vst3
+CVP301/**/*.lnk
+
+# Common large binaries
+*.prg
+*.fpm
+*.mscz
+*.sf2
+*.exe
+*.dll
+*.msi
+*.mp3
+*.wav
+*.zip
+*.7z
+*.bin
+*.lnk
+
+# Samples (skip if large) - adjust if you want sample assets committed
+samples/
