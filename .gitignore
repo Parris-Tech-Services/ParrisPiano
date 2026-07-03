@@ -39,3 +39,5 @@ CVP301/**/*.lnk
 
 # Samples (skip if large) - adjust if you want sample assets committed
 samples/
+analysis/*.sns
+Ableton*/
