@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parris Piano Hub</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="hero-pill">Practice Hub</div>
+    <h1>Parris Piano Hub</h1>
+    <p class="tagline">
+      One polished place to practice with your Yamaha CVP-301, capture sessions, spot timing issues, and jump straight into notation, DAW work, or guided drills.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-chip">Live MIDI monitor</div>
+      <div class="meta-chip">Metronome + scoring</div>
+      <div class="meta-chip">Session recording</div>
+      <div class="meta-chip">Notation preview</div>
+    </div>
+  </header>
+
+  <main class="grid">
+    <article class="card feature-card" id="midi-card">
+      <div class="feature-heading">
+        <div>
+          <div class="pill">MIDI Practice</div>
+          <h2>CVP-301 Live Session Desk</h2>
+          <p class="feature-summary">
+            Connect your piano, track timing against the beat, capture a session, and turn the latest performance into a short practice plan and notation preview.
+          </p>
+        </div>
+        <div class="feature-actions">
+          <button id="clear-session" class="btn btn-danger" type="button">Clear Session</button>
+          <button id="download-recording" class="btn" type="button" disabled>Download Recording</button>
+          <button id="download-plan" class="btn btn-secondary" type="button" disabled>Download Plan</button>
+        </div>
+      </div>
+
+      <div class="device-strip">
+        <label class="select-label" for="midi-inputs">MIDI input</label>
+        <select id="midi-inputs" aria-label="MIDI input">
+          <option value="">No device</option>
+        </select>
+        <button id="refresh-midi" class="btn btn-secondary" type="button">Refresh Inputs</button>
+        <div id="midi-status" class="status-badge status-disconnected" aria-live="polite">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="midi-state">Disconnected</span>
+        </div>
+      </div>
+
+      <div class="toolbar-grid">
+        <section class="control-group">
+          <h3>Keyboard View</h3>
+          <p>Shift focus quickly between close drilling and the full 88-key layout.</p>
+          <div class="control-row">
+            <button id="pan-left" class="btn btn-secondary" type="button">Pan Left</button>
+            <button id="pan-right" class="btn btn-secondary" type="button">Pan Right</button>
+            <label class="visually-hidden" for="key-range">Visible key range</label>
+            <select id="key-range">
+              <option value="2">2 octaves</option>
+              <option value="3">3 octaves</option>
+              <option value="4">4 octaves</option>
+              <option value="5">5 octaves</option>
+              <option value="full" selected>Full keyboard</option>
+            </select>
+            <button id="fit-width" class="btn btn-secondary" type="button">Fixed Size</button>
+            <button id="dock-toggle" class="btn btn-secondary" type="button">Close Keyboard</button>
+          </div>
+        </section>
+
+        <section class="control-group">
+          <h3>Practice Tools</h3>
+          <p>Keep the beat steady, mark a loop, and record a take without leaving the page.</p>
+          <div class="control-row">
+            <div class="tempo-group">
+              <label class="select-label" for="tempo">Metronome tempo</label>
+              <div class="control-row">
+                <input id="tempo" type="range" min="40" max="200" value="100">
+                <div id="bpm-value" class="status-badge">100 BPM</div>
+              </div>
+            </div>
+            <button id="metronome-toggle" class="btn" type="button">Start Metronome</button>
+            <div id="beat-indicator" class="status-badge" aria-live="off">Beat</div>
+            <button id="record-toggle" class="btn" type="button">Start Recording</button>
+            <div id="record-timer" class="status-badge" aria-live="polite">00:00</div>
+          </div>
+          <div class="control-row" style="margin-top:10px;">
+            <button id="load-midi-button" class="btn btn-secondary" type="button">Load MIDI Song</button>
+            <button id="clear-midi-song" class="btn btn-secondary" type="button" disabled>Clear Song</button>
+            <input id="midi-file-input" type="file" accept=".mid,.midi" hidden>
+          </div>
+          </div>
+        </section>
+
+        <section class="control-group">
+          <h3>Loop + Display Settings</h3>
+          <p>Set a rough loop anchor for drill work and keep only the UI pieces you need.</p>
+          <div class="control-row">
+            <button id="set-loop-a" class="btn btn-secondary" type="button">Set A</button>
+            <button id="set-loop-b" class="btn btn-secondary" type="button">Set B</button>
+            <button id="toggle-loop" class="btn btn-secondary" type="button">Loop: Off</button>
+            <div id="loop-info" class="status-badge">A: -- B: --</div>
+          </div>
+          <div class="control-row" style="margin-top:10px;">
+            <label class="select-label" for="hide-keyboard-toggle">Minimal mode</label>
+            <input type="checkbox" id="hide-keyboard-toggle">
+            <span class="select-label">Hide on-screen keyboard</span>
+          </div>
+        </section>
+      </div>
+
+      <div class="session-strip">
+        <div class="session-stat">
+          <span>Notes played</span>
+          <strong id="session-note-count">0</strong>
+          <small id="session-input-name">Waiting for MIDI input</small>
+        </div>
+        <div class="session-stat">
+          <span>Accuracy</span>
+          <strong id="session-accuracy">0%</strong>
+          <small id="session-accuracy-detail">No scored notes yet</small>
+        </div>
+        <div class="session-stat">
+          <span>Current streak</span>
+          <strong id="session-streak">0</strong>
+          <small id="session-best-streak">Best streak: 0</small>
+        </div>
+        <div class="session-stat">
+          <span>Last verdict</span>
+          <strong id="session-last-result">Waiting</strong>
+          <small id="session-last-delta">Play with the metronome to score timing</small>
+        </div>
+      </div>
+
+      <div id="keyboard-container" aria-live="polite"></div>
+      <p class="helper-note">
+        <strong>Tip:</strong> for full Web MIDI support, serve this page from <strong>http://localhost</strong> or use a browser that allows MIDI access from local files.
+      </p>
+
+      <div class="dashboard-grid">
+        <section class="dashboard-panel wide" id="score-panel">
+          <div class="dashboard-head">
+            <div>
+              <h3>Live Score</h3>
+              <small>Perfect is within +/-50 ms. Good is within +/-110 ms.</small>
+            </div>
+            <small>Bars shown: <span id="score-bars-count">8</span></small>
+          </div>
+          <div id="score-bars"></div>
+          <div class="metric-row">
+            <div><strong id="score-total">0</strong> notes scored</div>
+            <div><strong id="score-perfect">0</strong> perfect</div>
+            <div><strong id="score-good">0</strong> good</div>
+            <div><strong id="score-poor">0</strong> poor</div>
+          </div>
+          <p id="score-summary">No notes scored yet.</p>
+        </section>
+
+        <section class="dashboard-panel" id="practice-panel">
+          <div class="dashboard-head">
+            <div>
+              <h3>Practice Plan</h3>
+              <small>Generate short loop targets from your weakest recent bars.</small>
+            </div>
+            <button id="gen-plan" class="btn" type="button">Generate Plan</button>
+          </div>
+          <div id="plan-output">No plan generated yet.</div>
+          <div id="song-info" class="song-info">No MIDI song loaded.</div>
+        </section>
+
+        <section class="dashboard-panel" id="activity-panel">
+          <div class="dashboard-head">
+            <div>
+              <h3>Activity Feed</h3>
+              <small>Recent note hits, timing verdicts, and held-note state.</small>
+            </div>
+          </div>
+          <div id="activity-feed" class="activity-feed">
+            <div class="activity-empty">Play a note to start the activity feed.</div>
+          </div>
+          <div id="active-notes" class="held-notes">No notes held.</div>
+        </section>
+
+        <section class="dashboard-panel wide" id="sheet-panel">
+          <div class="dashboard-head">
+            <div>
+              <h3>Notation Preview</h3>
+              <small>The latest recorded take is turned into a short visual excerpt.</small>
+            </div>
+          </div>
+          <div id="sheet-status">Record a phrase to render a notation preview.</div>
+          <div id="sheet-preview" aria-live="polite"></div>
+        </section>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Guided Practice</div>
+      <h2>Piano Marvel</h2>
+      <p>Structured lessons, sight-reading tests, and progress tracking. Works great with MIDI keyboards.</p>
+      <div class="links">
+        <a class="btn" href="https://pianomarvel.com/en/nextgen/dashboard" target="_blank" rel="noopener">Open Dashboard</a>
+        <a class="btn" href="https://pianomarvel.com" target="_blank" rel="noopener">Learn More</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Browser Practice</div>
+      <h2>Midiano</h2>
+      <p>Web-based piano trainer with MIDI in and out. Great for quick practice without installs on the CVP-301.</p>
+      <div class="links">
+        <a class="btn" href="https://app.midiano.com/" target="_blank" rel="noopener">Open Midiano</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Learning + Games</div>
+      <h2>Synthesia</h2>
+      <p>Play-along falling notes with MIDI in and out. Great for learning songs quickly and drilling hands.</p>
+      <div class="links">
+        <a class="btn" href="https://www.synthesiagame.com" target="_blank" rel="noopener">Website</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Performance Visuals</div>
+      <h2>SeeMusic</h2>
+      <p>Record and render cinematic key-light videos from your MIDI performance.</p>
+      <div class="links">
+        <a class="btn" href="https://www.seemusicapp.com/download" target="_blank" rel="noopener">Download</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Open Source</div>
+      <h2>MIDIVisualizer</h2>
+      <p>DIY visualizer you can tweak and build yourself. Good for lightweight rendering or custom looks.</p>
+      <div class="links">
+        <a class="btn" href="https://github.com/skyzh/midi-visualizer" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Notation</div>
+      <h2>MuseScore Studio</h2>
+      <p>Import MIDI from the CVP, clean up notation, and print or share polished scores.</p>
+      <div class="links">
+        <a class="btn" href="https://musescore.org/en/download" target="_blank" rel="noopener">Download</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">DAW Recording</div>
+      <h2>Cakewalk</h2>
+      <p>Full DAW for sequencing, mixing, and capturing audio or MIDI from the CVP-301.</p>
+      <div class="links">
+        <a class="btn" href="https://www.bandlab.com/products/cakewalk" target="_blank" rel="noopener">Download</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Local DAW</div>
+      <h2>Cakewalk Sonar</h2>
+      <p>Browsers block direct EXE launch. Open the install folder, then run Sonar.exe or pin a shortcut.</p>
+      <div class="links">
+        <a class="btn" href="file:///C:/Program%20Files/Cakewalk/Sonar/">Open Install Folder</a>
+        <a class="btn" href="https://www.bandlab.com/products/cakewalk" target="_blank" rel="noopener">Reinstall or Update</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">DAW Alternative</div>
+      <h2>Tracktion Waveform</h2>
+      <p>Modern workflow DAW with a lighter feel for quick MIDI composition and audio capture.</p>
+      <div class="links">
+        <a class="btn" href="https://www.tracktion.com/products/waveform-free" target="_blank" rel="noopener">Download</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Quick Play</div>
+      <h2>FreePiano</h2>
+      <p>Simple MIDI router and virtual piano to test your CVP connection and play soft synths.</p>
+      <div class="links">
+        <a class="btn" href="https://freepiano.tiwb.com/en/" target="_blank" rel="noopener">Website</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="pill">Sheet Music</div>
+      <h2>My Google Drive</h2>
+      <p>Collection of sheet music and practice materials. Opens the shared Drive folder in your browser.</p>
+      <div class="links">
+        <a class="btn" href="https://drive.google.com/drive/folders/0B6bODXWhwMjKdDU3U1p3bjFmLTA?resourcekey=0-aQ1yhQwnHbthIVjs5_ry_g&usp=sharing" target="_blank" rel="noopener">Open Folder</a>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    Use the Yamaha USB-MIDI driver for the tightest latency. <span class="note">Practice flow:</span> warm up here, then move into Piano Marvel for drills or a DAW and MuseScore when arranging.
+  </footer>
+
+  <script src="midi-keyboard.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.27/build/Midi.js"></script>
+  <script src="https://unpkg.com/vexflow/releases/vexflow-min.js"></script>
+  <script src="sheet.js"></script>
+</body>
+</html>
+

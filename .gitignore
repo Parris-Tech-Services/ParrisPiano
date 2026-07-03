@@ -1,0 +1,35 @@
+.venv/
+.venv311/
+logs/
+*.log
+__pycache__/
+.pytest_cache/
+cvp_tutor/__pycache__/
+cvp_tutor/.venv/
+cvp_tutor/.venv311/
+*.pyc
+*.pyo
+*.pyd
+*.musicxml
+node_modules/
+dist/
+build/
+Desktop/
+
+# Generated frontend output
+frontend/node_modules/
+frontend/.next/
+
+# Large binaries and installers belong in the workspace archive
+CVP301/
+*.exe
+*.msi
+*.zip
+*.7z
+*.mp3
+*.wav
+*.lnk
+
+# Local analysis and temp artifacts
+analysis/
+misc/
