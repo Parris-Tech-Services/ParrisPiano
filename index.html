@@ -139,6 +139,7 @@
   const id = 'G-LV0CW7PHH0';
   const key = 'ga4-consent';
   const cleanLocation = () => window.location.origin + window.location.pathname;
+  if (window.location.search || window.location.hash) window.history.replaceState(null, document.title, cleanLocation());
   window.dataLayer = window.dataLayer || [];
   window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
   window.gtag('consent', 'default', { ad_storage:'denied', analytics_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', wait_for_update:500 });
