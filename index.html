@@ -132,11 +132,52 @@
       font-weight: 700;
     }
   </style>
-<!-- parris-umami-placeholder: replace REPLACE_WITH_UMAMI_WEBSITE_ID with a real Umami website UUID and remove this comment wrapper. Inactive until configured.
-<script defer src="https://cloud.umami.is/script.js" data-website-id="REPLACE_WITH_UMAMI_WEBSITE_ID" data-do-not-track="true" data-exclude-search="true" data-exclude-hash="true" data-performance="true" data-domains="parris-piano.vercel.app"></script>
+<!-- Previous inactive tracker removed; consent-controlled GA4 follows.
+-->
+<script>
+(() => {
+  const id = 'G-LV0CW7PHH0';
+  const key = 'ga4-consent';
+  const cleanLocation = () => window.location.origin + window.location.pathname;
+  if (window.location.search || window.location.hash) window.history.replaceState(null, document.title, cleanLocation());
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
+  window.gtag('consent', 'default', { ad_storage:'denied', analytics_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', wait_for_update:500 });
+  function startAnalytics() {
+    if (window.__ga4Loaded) return;
+    window.__ga4Loaded = true;
+    window.gtag('consent', 'update', { ad_storage:'denied', analytics_storage:'granted', ad_user_data:'denied', ad_personalization:'denied' });
+    window.gtag('js', new Date());
+    window.gtag('config', id, { page_location: cleanLocation(), page_referrer: '' });
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+    document.head.appendChild(script);
+  }
+  function choose(choice) {
+    try { localStorage.setItem(key, choice); } catch {}
+    document.getElementById('analytics-consent').hidden = true;
+    if (choice === 'granted') startAnalytics();
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const saved = (() => { try { return localStorage.getItem(key); } catch { return null; } })();
+    const banner = document.getElementById('analytics-consent');
+    if (saved === 'granted') { banner.hidden = true; startAnalytics(); }
+    if (saved === 'denied') banner.hidden = true;
+    document.getElementById('analytics-allow').addEventListener('click', () => choose('granted'));
+    document.getElementById('analytics-decline').addEventListener('click', () => choose('denied'));
+  });
+})();
+</script>
+<!-- End of the retired placeholder marker.
 -->
 </head>
 <body>
+<aside id="analytics-consent" role="dialog" aria-label="Analytics consent">
+  <p>Allow anonymous, aggregate usage measurement? No names, form contents, search text, or user IDs are collected.</p>
+  <button id="analytics-allow" type="button">Allow analytics</button>
+  <button id="analytics-decline" type="button">Decline</button>
+</aside>
   <header>
     <div class="pill">Practice Hub</div>
     <h1>Parris Piano App</h1>
