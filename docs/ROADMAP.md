@@ -1,29 +1,29 @@
 # Roadmap & Milestones
 
 Milestone 1 — MIDI Tutor Core (MVP)
-- Connect CVP-301 MIDI IN/OUT reliably.
-- Load MIDI files and build canonical timeline (ticks → seconds) with tempo map.
-- Present two UI modes: Piano-roll (Synthesia-like) and On-screen Keyboard.
-- Follow mode scoring and basic feedback.
-- Acceptance tests: keys show in monitor; load MIDI renders; simple scoring works.
+- **UN-20261024-016-0004** Connect CVP-301 MIDI IN/OUT reliably.
+- **UN-20261024-016-0005** Load MIDI files and build canonical timeline (ticks → seconds) with tempo map.
+- **UN-20261024-016-0006** Present two UI modes: Piano-roll (Synthesia-like) and On-screen Keyboard.
+- **UN-20261024-016-0007** Follow mode scoring and basic feedback.
+- **UN-20261024-016-0008** Acceptance tests: keys show in monitor; load MIDI renders; simple scoring works.
 
 Milestone 2 — Wait Mode + Looping
-- Implement Wait mode (advance only when expected chord/note played).
-- Loop bars and tempo scaling (slow practice).
-- Hint playback via MIDI OUT (soft notes).
+- **UN-20261024-016-0011** Implement Wait mode (advance only when expected chord/note played).
+- **UN-20261024-016-0012** Loop bars and tempo scaling (slow practice).
+- **UN-20261024-016-0013** Hint playback via MIDI OUT (soft notes).
 
 Milestone 3 — Library, Profiles, Persistence
-- Song library and section markers.
-- User profiles and basic progress tracking.
-- Save session recordings (MIDI).
+- **UN-20261024-016-0016** Song library and section markers.
+- **UN-20261024-016-0017** User profiles and basic progress tracking.
+- **UN-20261024-016-0018** Save session recordings (MIDI).
 
 Milestone 4 — Diagnosis + Planner
-- Rule-based diagnosis engine (top 3 issues + drill suggestions).
-- Simple practice planner & spaced repetition.
+- **UN-20261024-016-0021** Rule-based diagnosis engine (top 3 issues + drill suggestions).
+- **UN-20261024-016-0022** Simple practice planner & spaced repetition.
 
 Milestone 5 — AI Coach (optional)
-- Provide structured session summary JSON for LLM consumption.
-- LLM-based textual coaching and explanation (online/optional).
+- **UN-20261024-016-0025** Provide structured session summary JSON for LLM consumption.
+- **UN-20261024-016-0026** LLM-based textual coaching and explanation (online/optional).
 
 Notes:
 - Ship Milestone 1 as a fast, stable desktop app (PyQt6 + mido/rtmidi recommended).
